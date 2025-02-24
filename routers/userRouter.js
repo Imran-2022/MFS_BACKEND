@@ -17,6 +17,8 @@ const newUser = async(req,res)=>{
 
     const salt=await bcrypt.genSalt(10);
     user.pin=await bcrypt.hash(user.pin,salt);
+    if(user.accountType=='User') user.balance=40;
+    else user.balance=100000;
 
     const token=user.generateJWT();
     
