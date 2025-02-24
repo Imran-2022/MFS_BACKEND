@@ -75,10 +75,23 @@ const newTransaction = async (req, res) => {
 
         // Cash Out logic
         if (type === "Cash Out") {
-            if (amount > senderUser.balance) {
+
+            if(receiverUser.accountType!="Agent"){
+                return res.status(400).json({ error: "receiver Should be Agent" });
+            }
+            if (amount > senderUser.balance +(amount*1.5)/100) {
                 return res.status(400).json({ error: "Insufficient balance for cash out" });
             }
-            senderUser.balance -= amount;
+
+            senderUser.balance-=amount + (amount*1.5)/100;
+            receiverUser.balance+=amount;
+            receiverUser.income+=(amount)/100;
+
+            const admin = await User.findOne({ accountType: "Admin" });
+            admin.income+=(amount*0.5)/100;
+
+            await admin.save();
+            await receiverUser.save();
             await senderUser.save();
         }
 
