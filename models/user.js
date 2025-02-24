@@ -36,6 +36,11 @@ const userSchema = new Schema({
         required: true,
         unique: true,
         match: /^[0-9]{10}$/ 
+    },
+    balance: {
+        type: Number,
+        required: true,
+        default: 40 
     }
 });
 

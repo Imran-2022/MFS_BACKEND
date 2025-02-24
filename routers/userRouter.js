@@ -45,7 +45,7 @@ const authUser = async (req, res) => {
     // Send response
     res.send({
         token: token,
-        user: _.pick(user, ['_id', 'email', 'mobile', 'name', 'accountType'])
+        user: _.pick(user, ['_id', 'email', 'mobile', 'name', 'accountType','balance'])
     });
 };
 
