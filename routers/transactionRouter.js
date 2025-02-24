@@ -51,7 +51,7 @@ const newTransaction = async (req, res) => {
             }
 
             // Deduct from sender & add to receiver
-            senderUser.balance -= amount;
+            senderUser.balance -=( amount + 5);
             receiverUser.balance += amount;
 
             // Save updated balances
@@ -61,7 +61,15 @@ const newTransaction = async (req, res) => {
 
         // Cash In logic
         if (type === "Cash In") {
-            senderUser.balance += amount;
+            if(senderUser.accountType!="Agent"){
+                return res.status(400).json({ error: "Sender Should be Agent" });
+            }
+            if(amount>senderUser.balance){
+                return res.status(400).json({ error: "Insufficient balance" });
+            }
+            senderUser.balance-=amount;
+            receiverUser.balance+=amount;
+            await receiverUser.save();
             await senderUser.save();
         }
 
