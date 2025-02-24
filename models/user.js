@@ -1,33 +1,47 @@
 const jwt=require('jsonwebtoken');
-const Joi =require('joi');
+const { Schema, model } = require('mongoose');
+const Joi = require('joi');
 
-const {Schema,model} =require('mongoose');
-
-const userSchema = Schema({
-    email:{
-        type:String,
-        required:true,
-        unique:true,
-        minlenght:5,
-        maxlength:255,
+const userSchema = new Schema({
+    name: {
+        type: String,
+        required: true,
+        minlength: 3,
+        maxlength: 50
     },
-    password:{
-        type:String,
-        required:true,
-        minlenght:5,
-        maxlength:1024,
+    pin: {
+        type: String,
+        required: true
     },
-    username:{
-        type:String,
-        required:true,
-        minlenght:3,
-        maxlength:20,
+    mobile: {
+        type: String,
+        required: true,
+        unique: true,
+        match: /^[0-9]{11}$/ 
+    },
+    email: {
+        type: String,
+        required: true,
+        unique: true,
+        minlength: 5,
+        maxlength: 255
+    },
+    accountType: {
+        type: String,
+        required: true,
+        enum: ["Agent", "User"] 
+    },
+    nid: {
+        type: String,
+        required: true,
+        unique: true,
+        match: /^[0-9]{10}$/ 
     }
 });
 
 
 userSchema.methods.generateJWT=function(){
-    const token=jwt.sign({id:this._id,email:this.email,username:this.username},process.env.JWT_SECRET_KEY,{
+    const token=jwt.sign({id:this._id,email:this.email,name:this.name},process.env.JWT_SECRET_KEY,{
         expiresIn:"3h"
     });
 
@@ -35,16 +49,20 @@ userSchema.methods.generateJWT=function(){
 }
 
 
-const validateUser=user=>{
-    const schema=Joi.object({
-        email : Joi.string().min(5).max(255).required().email(),
-        password:Joi.string().min(5).max(255).required(),
-        username:Joi.string().min(3).max(20).required()
-    
+
+// Joi Validation
+const validateUser = (user) => {
+    const schema = Joi.object({
+        name: Joi.string().min(3).max(50).required(),
+        pin: Joi.string().length(5).pattern(/^[0-9]{5}$/).required(),
+        mobile: Joi.string().length(11).pattern(/^[0-9]{11}$/).required(),
+        email: Joi.string().email().min(5).max(255).required(),
+        accountType: Joi.string().valid("Agent", "User").required(),
+        nid: Joi.string().length(10).pattern(/^[0-9]{10}$/).required()
     });
-   return schema.validate(user);
-}
 
+    return schema.validate(user);
+};
 
-module.exports.User=model('User',userSchema);
-module.exports.validate=validateUser;
+module.exports.User = model('User', userSchema);
+module.exports.validate = validateUser;
