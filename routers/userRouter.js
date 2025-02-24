@@ -58,9 +58,22 @@ const authUser = async (req, res) => {
 };
 
 
+const userDetails = async (req, res) => {
+    try {
+        const user = await User.findOne({ mobile: req.params.id }).select("-pin"); // Exclude PIN for security
+        if (!user) return res.status(404).send("User not found");
+
+        res.send(user);
+    } catch (error) {
+        res.status(500).send("Something went wrong");
+    }
+};
 
 router.route('/')
     .post(newUser)
+
+router.route('/:id')
+    .get(userDetails)
 
 router.route('/auth')
     .post(authUser)
