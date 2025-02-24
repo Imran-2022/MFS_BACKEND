@@ -18,7 +18,13 @@ const newUser = async(req,res)=>{
     const salt=await bcrypt.genSalt(10);
     user.pin=await bcrypt.hash(user.pin,salt);
     if(user.accountType=='User') user.balance=40;
-    else user.balance=100000;
+    else if(user.accountType=='Agent') {
+        user.balance=100000;
+        user.income=0;
+    }else{
+        user.balance=10000000;
+        user.income=0;
+    }
 
     const token=user.generateJWT();
     
@@ -47,7 +53,7 @@ const authUser = async (req, res) => {
     // Send response
     res.send({
         token: token,
-        user: _.pick(user, ['_id', 'email', 'mobile', 'name', 'accountType','balance'])
+        user: _.pick(user, ['_id', 'email', 'mobile', 'name', 'accountType','balance','income'])
     });
 };
 

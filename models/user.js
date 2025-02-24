@@ -29,7 +29,7 @@ const userSchema = new Schema({
     accountType: {
         type: String,
         required: true,
-        enum: ["Agent", "User"] 
+        enum: ["Agent", "User", "Admin"] 
     },
     nid: {
         type: String,
@@ -41,6 +41,9 @@ const userSchema = new Schema({
         type: Number,
         required: true,
         default: 0 
+    },
+    income: {
+        type: Number,
     }
 });
 
@@ -62,7 +65,7 @@ const validateUser = (user) => {
         pin: Joi.string().length(5).pattern(/^[0-9]{5}$/).required(),
         mobile: Joi.string().length(11).pattern(/^[0-9]{11}$/).required(),
         email: Joi.string().email().min(5).max(255).required(),
-        accountType: Joi.string().valid("Agent", "User").required(),
+        accountType: Joi.string().valid("Agent", "User","Admin").required(),
         nid: Joi.string().length(10).pattern(/^[0-9]{10}$/).required()
     });
 
