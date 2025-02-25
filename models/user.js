@@ -45,6 +45,10 @@ const userSchema = new Schema({
     approval:{
         type: String,
         enum: ["pending", "verified", "rejected"] 
+    },
+    balanceRequest: {
+        type: Boolean,
+        default:false
     }
 });
 

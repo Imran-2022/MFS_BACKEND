@@ -54,7 +54,7 @@ const authUser = async (req, res) => {
     // Send response
     res.send({
         token: token,
-        user: _.pick(user, ['_id', 'email', 'mobile', 'name', 'accountType','balance','income','approval'])
+        user: _.pick(user, ['_id', 'email', 'mobile', 'name', 'accountType','balance','approval','balanceRequest'])
     });
 };
 
@@ -75,9 +75,16 @@ const updateUser = async (req, res) => {
     try {
         const { approval } = req.body;
         const mobile = req.params.id;
-
         // Find user by mobile
         const user = await User.findOne({ mobile });
+
+        if(approval==="rejectedRecharge"){
+            user.balanceRequest=false;
+             // Save changes
+            await user.save();
+            return res.status(200).json({ message: "Rejected to Recharge Balance", user });
+        }
+
         const admin = await User.findOne({accountType:"Admin"})
         if (!user || !admin) {
             return res.status(404).json({ message: "User not found" });
@@ -85,8 +92,12 @@ const updateUser = async (req, res) => {
         // Update fields
         user.approval = approval;
         if (approval === 'verified') {
-            user.balance = 10000;
-            admin.balance-=10000;
+            if(admin.balance>=100000){
+                user.balance = 100000;
+                admin.balance-=100000;
+            }else{
+                return res.status(500).json({ error: "Admin have no Enough balance " });
+            }
         }
 
         // Save changes
@@ -99,7 +110,6 @@ const updateUser = async (req, res) => {
         return res.status(500).json({ error: "Something went wrong" });
     }
 };
-
 
 
 const agentsWithPending = async (req, res) => {
@@ -140,11 +150,28 @@ const getAgentsBalance = async (req, res) => {
 };
 
 
+const agentsWithReschargeRequest = async (req, res) => {
+    try {
+        const users = await User.find({ 
+            accountType:'Agent',
+            balanceRequest:true
+        }).select("-pin");
+        // console.log("Found users:", users); // Debugging line
+        res.send(users);
+    } catch (error) {
+        res.status(500).send("Something went wrong");
+    }
+};
+
+
 router.route('/')
     .post(newUser)
+
 router.route('/agentspending')
     .get(agentsWithPending)
 
+router.route('/agentsRescharge')
+    .get(agentsWithReschargeRequest)
 
 
 router.route('/auth')

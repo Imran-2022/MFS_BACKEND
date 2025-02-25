@@ -16,8 +16,11 @@ const newTransaction = async (req, res) => {
         const senderUser = await User.findOne({ mobile: sender });
         const receiverUser = await User.findOne({ mobile: receiver });
 
-        if (!senderUser || !receiverUser || senderUser.mobile === receiverUser.mobile) {
+        if (!senderUser || !receiverUser) {
             return res.status(400).json({ error: "Sender or Receiver not found" });
+        }
+        if (senderUser.mobile === receiverUser.mobile) {
+            return res.status(400).json({ error: "Sender & Receiver can't be same" });
         }
 
         // Create transaction object
@@ -64,8 +67,13 @@ const newTransaction = async (req, res) => {
 
         // Cash In logic
         if (type === "Cash In") {
-            if(senderUser.accountType!="Agent"){
-                return res.status(400).json({ error: "Sender Should be Agent" });
+            
+            if(req.body?.balanceRequest){
+                receiverUser.balanceRequest=false;
+            }
+
+            if(senderUser.accountType=="User"){
+                return res.status(400).json({ error: "Sender Can't User for cash in" });
             }
             if(amount>senderUser.balance){
                 return res.status(400).json({ error: "Insufficient balance" });

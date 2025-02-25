@@ -29,6 +29,10 @@ const transactionSchema = new Schema({
         required: true,
         enum: ["Send Money", "Cash In", "Cash Out"] 
     },
+    balanceRequest: {
+        type: Boolean,
+        default:false
+    },
     timestamp: {
         type: Date,
         default: Date.now // Auto-sets the transaction time
@@ -41,6 +45,7 @@ const validateTransaction = (transaction) => {
         sender: Joi.string().length(11).pattern(/^[0-9]{11}$/).required(),
         receiver: Joi.string().length(11).pattern(/^[0-9]{11}$/).required(),
         amount: Joi.number().min(0).required(),
+        balanceRequest: Joi.boolean(),
         type: Joi.string().valid("Send Money", "Cash In", "Cash Out").required()
     });
 
