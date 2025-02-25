@@ -78,6 +78,13 @@ const updateUser = async (req, res) => {
         // Find user by mobile
         const user = await User.findOne({ mobile });
 
+        if(approval==="balanceRequest"){
+            user.balanceRequest=true;
+            // Save changes
+           await user.save();
+           return res.status(200).json({ message: "requested for balance recharge", user });
+        }
+
         if(approval==="rejectedRecharge"){
             user.balanceRequest=false;
              // Save changes
