@@ -48,7 +48,7 @@ const newTransaction = async (req, res) => {
                 }
                 else{
                     const admin = await User.findOne({ accountType: "Admin" });
-                    admin.income+=5;
+                    admin.balance+=5; //income
                     await admin.save();
                      // Deduct from sender & add to receiver
                     senderUser.balance -=( amount + 5);
@@ -88,10 +88,10 @@ const newTransaction = async (req, res) => {
 
             senderUser.balance-=amount + (amount*1.5)/100;
             receiverUser.balance+=amount;
-            receiverUser.income+=(amount)/100;
+            receiverUser.balance+=(amount)/100; // income 
 
             const admin = await User.findOne({ accountType: "Admin" });
-            admin.income+=(amount*0.5)/100;
+            admin.balance+=(amount*0.5)/100; // income
 
             await admin.save();
             await receiverUser.save();
@@ -114,7 +114,7 @@ const userTransactions = async (req, res) => {
         // Find transactions where the user is either sender or receiver
         const transactions = await Transaction.find({
             $or: [{ sender: mobile }, { receiver: mobile }]
-        });
+        }).sort({ timestamp: -1 }); // Sorting in descending order
 
         return res.status(200).json(transactions);
     } catch (error) {
@@ -125,7 +125,7 @@ const userTransactions = async (req, res) => {
 
 const allTransaction = async (req, res) => {
     try {
-        const transactions = await Transaction.find();
+        const transactions = await Transaction.find().sort({ timestamp: -1 }); // Sorting in descending order;
         return res.status(200).json(transactions);
     } catch (error) {
         console.error(error);

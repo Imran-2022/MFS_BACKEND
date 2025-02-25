@@ -42,9 +42,6 @@ const userSchema = new Schema({
         required: true,
         default: 0 
     },
-    income: {
-        type: Number,
-    },
     approval:{
         type: String,
         enum: ["pending", "verified", "rejected"] 
