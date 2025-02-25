@@ -115,16 +115,47 @@ const agentsWithPending = async (req, res) => {
 };
 
 
+const getUsersBalance = async (req, res) => {
+    try {
+        const users = await User.find({ accountType: 'User' }, 'balance'); // Fetch only balance field
+        const userTotalBalance = users.reduce((sum, user) => sum + (Number(user.balance) || 0), 0);
+        res.json({ userTotalBalance });
+    } catch (error) {
+        console.error("Error fetching user balance:", error);
+        res.status(500).send("Something went wrong");
+    }
+};
+
+const getAgentsBalance = async (req, res) => {
+    try {
+        const agents = await User.find({ accountType: 'Agent' }, 'balance'); // Fetch only balance field
+        const agentTotalBalance = agents.reduce((sum, agent) => sum + (Number(agent.balance) || 0), 0);
+        res.json({ agentTotalBalance });
+    } catch (error) {
+        console.error("Error fetching agent balance:", error);
+        res.status(500).send("Something went wrong");
+    }
+};
+
+
 router.route('/')
     .post(newUser)
 router.route('/agentspending')
     .get(agentsWithPending)
 
-router.route('/:id')
-    .get(userDetails)
-    .patch(updateUser);
+
 
 router.route('/auth')
     .post(authUser)
 
+router.route('/get_users_balance')
+    .get(getUsersBalance)
+
+router.route('/get_agets_balance')
+    .get(getAgentsBalance)
+
+router.route('/:id')
+    .get(userDetails)
+    .patch(updateUser);
+    
 module.exports=router;
