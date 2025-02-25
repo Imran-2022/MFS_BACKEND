@@ -107,5 +107,36 @@ const newTransaction = async (req, res) => {
     }
 }
 
-router.route('/').post(newTransaction);
+const userTransactions = async (req, res) => {
+    try {
+        const { mobile } = req.params;
+
+        // Find transactions where the user is either sender or receiver
+        const transactions = await Transaction.find({
+            $or: [{ sender: mobile }, { receiver: mobile }]
+        });
+
+        return res.status(200).json(transactions);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+
+const allTransaction = async (req, res) => {
+    try {
+        const transactions = await Transaction.find();
+        return res.status(200).json(transactions);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+
+router.route('/')
+    .post(newTransaction)
+    .get(allTransaction)
+router.route('/:mobile')
+    .get(userTransactions)
+
 module.exports = router;
