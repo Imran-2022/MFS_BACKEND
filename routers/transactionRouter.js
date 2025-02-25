@@ -36,6 +36,9 @@ const newTransaction = async (req, res) => {
             if(amount>=50 && amount<=100){
                 if (amount > senderUser.balance) {
                     return res.status(400).json({ error: "Insufficient balance" });
+                }else{
+                    senderUser.balance -= amount;
+                    receiverUser.balance += amount;
                 }
             }
 
@@ -47,12 +50,12 @@ const newTransaction = async (req, res) => {
                     const admin = await User.findOne({ accountType: "Admin" });
                     admin.income+=5;
                     await admin.save();
+                     // Deduct from sender & add to receiver
+                    senderUser.balance -=( amount + 5);
+                    receiverUser.balance += amount;
                 }
+               
             }
-
-            // Deduct from sender & add to receiver
-            senderUser.balance -=( amount + 5);
-            receiverUser.balance += amount;
 
             // Save updated balances
             await senderUser.save();
