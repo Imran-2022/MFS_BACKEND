@@ -19,8 +19,9 @@ const newUser = async(req,res)=>{
     user.pin=await bcrypt.hash(user.pin,salt);
     if(user.accountType=='User') user.balance=40;
     else if(user.accountType=='Agent') {
-        user.balance=100000;
+        user.balance=0;
         user.income=0;
+        user.approval="pending";
     }else{
         user.balance=10000000;
         user.income=0;
@@ -53,7 +54,7 @@ const authUser = async (req, res) => {
     // Send response
     res.send({
         token: token,
-        user: _.pick(user, ['_id', 'email', 'mobile', 'name', 'accountType','balance','income'])
+        user: _.pick(user, ['_id', 'email', 'mobile', 'name', 'accountType','balance','income','approval'])
     });
 };
 
@@ -69,11 +70,59 @@ const userDetails = async (req, res) => {
     }
 };
 
+
+const updateUser = async (req, res) => {
+    try {
+        const { approval } = req.body;
+        const mobile = req.params.id;
+
+        // Find user by mobile
+        const user = await User.findOne({ mobile });
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // Update fields
+        user.approval = approval;
+        if (approval === 'verified') {
+            user.balance = 10000;
+        }
+
+        // Save changes
+        await user.save();
+        return res.status(200).json({ message: "Agent updated successfully", user });
+
+    } catch (error) {
+        console.error("Error updating agent:", error);
+        return res.status(500).json({ error: "Something went wrong" });
+    }
+};
+
+
+
+const agentsWithPending = async (req, res) => {
+    try {
+        const users = await User.find({ 
+            accountType:'Agent',
+            approval:'pending'
+        }).select("-pin");
+        if (!users.length) return res.status(404).send("No pending agents found");
+
+        res.send(users);
+    } catch (error) {
+        res.status(500).send("Something went wrong");
+    }
+};
+
+
 router.route('/')
     .post(newUser)
+router.route('/agentspending')
+    .get(agentsWithPending)
 
 router.route('/:id')
     .get(userDetails)
+    .patch(updateUser);
 
 router.route('/auth')
     .post(authUser)

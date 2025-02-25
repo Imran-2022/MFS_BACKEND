@@ -44,12 +44,16 @@ const userSchema = new Schema({
     },
     income: {
         type: Number,
+    },
+    approval:{
+        type: String,
+        enum: ["pending", "verified", "rejected"] 
     }
 });
 
 
 userSchema.methods.generateJWT=function(){
-    const token=jwt.sign({id:this._id,email:this.email,name:this.name},process.env.JWT_SECRET_KEY,{
+    const token=jwt.sign({id:this._id,email:this.email,name:this.name,approval:this.approval},process.env.JWT_SECRET_KEY,{
         expiresIn:"3h"
     });
 
