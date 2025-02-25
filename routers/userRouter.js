@@ -23,7 +23,7 @@ const newUser = async(req,res)=>{
         user.income=0;
         user.approval="pending";
     }else{
-        user.balance=10000000;
+        user.balance=10000000; //admin 
         user.income=0;
     }
 
@@ -78,18 +78,20 @@ const updateUser = async (req, res) => {
 
         // Find user by mobile
         const user = await User.findOne({ mobile });
-        if (!user) {
+        const admin = await User.findOne({accountType:"Admin"})
+        if (!user || !admin) {
             return res.status(404).json({ message: "User not found" });
         }
-
         // Update fields
         user.approval = approval;
         if (approval === 'verified') {
             user.balance = 10000;
+            admin.balance-=10000;
         }
 
         // Save changes
         await user.save();
+        await admin.save();
         return res.status(200).json({ message: "Agent updated successfully", user });
 
     } catch (error) {
