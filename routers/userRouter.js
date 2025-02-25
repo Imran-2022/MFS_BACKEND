@@ -125,8 +125,7 @@ const agentsWithPending = async (req, res) => {
             accountType:'Agent',
             approval:'pending'
         }).select("-pin");
-        if (!users.length) return res.status(404).send("No pending agents found");
-
+        // if (!users.length) return res.status(404).send("No pending agents found");
         res.send(users);
     } catch (error) {
         res.status(500).send("Something went wrong");
