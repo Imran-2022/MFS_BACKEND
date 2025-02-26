@@ -22,7 +22,7 @@ const transactionSchema = new Schema({
     amount: {
         type: Number,
         required: true,
-        min: 0 
+        min: 1 
     },
     type: {
         type: String,
@@ -47,7 +47,7 @@ const validateTransaction = (transaction) => {
     const schema = Joi.object({
         sender: Joi.string().length(11).pattern(/^[0-9]{11}$/).required(),
         receiver: Joi.string().length(11).pattern(/^[0-9]{11}$/).required(),
-        amount: Joi.number().min(0).required(),
+        amount: Joi.number().min(1).required(),
         balanceRequest: Joi.boolean(),
         pin: Joi.string().length(5).pattern(/^[0-9]{5}$/),
         type: Joi.string().valid("Send Money", "Cash In", "Cash Out").required()
