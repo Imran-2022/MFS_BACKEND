@@ -11,7 +11,13 @@ const newUser = async(req,res)=>{
     if(error)return res.status(400).send(error.details[0].message);
     
     let user =await User.findOne({email:req.body.email});
-    if(user)return res.status(400).send('user already registered !');
+    if(user)return res.status(400).send({error: 'user already registered with this email ! '});
+    
+    user =await User.findOne({mobile:req.body.mobile});
+    if(user)return res.status(400).send({error: 'user already registered with this mobile number ! '});
+
+    user =await User.findOne({nid:req.body.nid});
+    if(user)return res.status(400).send({error: 'user already registered with this NID ! '});
 
     user = new User(req.body);
 
@@ -42,11 +48,11 @@ const authUser = async (req, res) => {
 
     // Find user by email or mobile number
     let user = await User.findOne({ $or: [{ email: identifier }, { mobile: identifier }] });
-    if (!user) return res.status(400).send("Invalid email/mobile or PIN!");
+    if (!user) return res.status(400).send({error:"Invalid email/mobile or PIN!"});
 
     // Compare provided PIN with stored PIN
     const validUser = await bcrypt.compare(pin, user.pin);
-    if (!validUser) return res.status(400).send("Invalid email/mobile or PIN!");
+    if (!validUser) return res.status(400).send({error:"Invalid email/mobile or PIN!"});
 
     // Generate token
     const token = user.generateJWT();
