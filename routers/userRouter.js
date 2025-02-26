@@ -207,10 +207,10 @@ router.route('/')
     .get(allUsers)
 
 router.route('/agentspending')
-    .get(agentsWithPending)
+    .get(authorize,agentsWithPending)
 
 router.route('/agentsRescharge')
-    .get(agentsWithReschargeRequest)
+    .get(authorize,agentsWithReschargeRequest)
 
 
 router.route('/auth')
@@ -224,6 +224,6 @@ router.route('/get_agets_balance')
 
 router.route('/:id')
     .get(userDetails)
-    .patch(updateUser);
+    .patch(authorize,updateUser);
     
 module.exports=router;

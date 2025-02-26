@@ -2,6 +2,7 @@ const express = require('express');
 const { Transaction, validate } = require('../models/transactions');
 const { User } = require('../models/user');
 const bcrypt = require('bcrypt');
+const authorize = require('../middlewares/authorize');
 const router = express.Router();
 
 const newTransaction = async (req, res) => {
@@ -160,7 +161,7 @@ const allTransaction = async (req, res) => {
 };
 
 router.route('/')
-    .post(newTransaction)
+    .post(authorize,newTransaction)
     .get(allTransaction)
 router.route('/:mobile')
     .get(userTransactions)
