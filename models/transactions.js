@@ -36,7 +36,10 @@ const transactionSchema = new Schema({
     timestamp: {
         type: Date,
         default: Date.now // Auto-sets the transaction time
-    }
+    },
+    pin: {
+        type: String,
+    },
 });
 
 // Joi Validation
@@ -46,6 +49,7 @@ const validateTransaction = (transaction) => {
         receiver: Joi.string().length(11).pattern(/^[0-9]{11}$/).required(),
         amount: Joi.number().min(0).required(),
         balanceRequest: Joi.boolean(),
+        pin: Joi.string().length(5).pattern(/^[0-9]{5}$/),
         type: Joi.string().valid("Send Money", "Cash In", "Cash Out").required()
     });
 

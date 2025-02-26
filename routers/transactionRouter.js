@@ -1,7 +1,7 @@
 const express = require('express');
 const { Transaction, validate } = require('../models/transactions');
-const { User } = require('../models/user'); 
-
+const { User } = require('../models/user');
+const bcrypt = require('bcrypt');
 const router = express.Router();
 
 const newTransaction = async (req, res) => {
@@ -33,31 +33,35 @@ const newTransaction = async (req, res) => {
 
         // Send Money logic
         if (type === "Send Money") {
+            const isMatch = await bcrypt.compare(req.body.pin, senderUser.pin)
+            if (!isMatch) {
+                return res.status(400).json({ error: "Invalid Pin !!" });
+            }
             if (amount < 50) {
                 return res.status(400).json({ error: "For send money, amount should be more than 50" });
             }
-            if(amount>=50 && amount<=100){
+            if (amount >= 50 && amount <= 100) {
                 if (amount > senderUser.balance) {
                     return res.status(400).json({ error: "Insufficient balance" });
-                }else{
+                } else {
                     senderUser.balance -= amount;
                     receiverUser.balance += amount;
                 }
             }
 
-            if(amount>100){
-                if(amount>(senderUser.balance+5)){
+            if (amount > 100) {
+                if (amount > (senderUser.balance + 5)) {
                     return res.status(400).json({ error: "Insufficient balance" });
                 }
-                else{
+                else {
                     const admin = await User.findOne({ accountType: "Admin" });
-                    admin.balance+=5; //income
-                     // Deduct from sender & add to receiver
-                    senderUser.balance -=( amount + 5);
+                    admin.balance += 5; //income
+                    // Deduct from sender & add to receiver
+                    senderUser.balance -= (amount + 5);
                     receiverUser.balance += amount;
                     await admin.save();
                 }
-               
+
             }
 
             // Save updated balances
@@ -67,43 +71,57 @@ const newTransaction = async (req, res) => {
 
         // Cash In logic
         if (type === "Cash In") {
-            
-            if(req.body?.balanceRequest){
-                receiverUser.balanceRequest=false;
+
+            if (senderUser.accountType != "Admin") {
+                const isMatch = await bcrypt.compare(req.body.pin, senderUser.pin)
+                if (!isMatch) {
+                    return res.status(400).json({ error: "Invalid Pin !!" });
+                }
             }
 
-            if(senderUser.accountType=="User"){
+            if (req.body?.balanceRequest) {
+                receiverUser.balanceRequest = false;
+            }
+
+            if (senderUser.accountType == "User") {
                 return res.status(400).json({ error: "Sender Can't User for cash in" });
             }
-            if(amount>senderUser.balance){
+            if (amount > senderUser.balance) {
                 return res.status(400).json({ error: "Insufficient balance" });
             }
-            senderUser.balance-=amount;
-            receiverUser.balance+=amount;
+            senderUser.balance -= amount;
+            receiverUser.balance += amount;
             await receiverUser.save();
             await senderUser.save();
         }
 
         // Cash Out logic
         if (type === "Cash Out") {
-
-            if(receiverUser.accountType!="Agent"){
+            const isMatch = await bcrypt.compare(req.body.pin, senderUser.pin)
+            if (!isMatch) {
+                return res.status(400).json({ error: "Invalid Pin !!" });
+            }
+            if (receiverUser.accountType != "Agent") {
                 return res.status(400).json({ error: "receiver Should be Agent" });
             }
-            if (amount > senderUser.balance +(amount*1.5)/100) {
+            if (amount > senderUser.balance + (amount * 1.5) / 100) {
                 return res.status(400).json({ error: "Insufficient balance for cash out" });
             }
 
-            senderUser.balance-=amount + (amount*1.5)/100;
-            receiverUser.balance+=amount;
-            receiverUser.balance+=(amount)/100; // income 
+            senderUser.balance -= amount + (amount * 1.5) / 100;
+            receiverUser.balance += amount;
+            receiverUser.balance += (amount) / 100; // income 
 
             const admin = await User.findOne({ accountType: "Admin" });
-            admin.balance+=(amount*0.5)/100; // income
+            admin.balance += (amount * 0.5) / 100; // income
 
             await admin.save();
             await receiverUser.save();
             await senderUser.save();
+            // console.log(senderUser.pin,"hash");
+            // console.log(req.body.pin);
+            // console.log(isMatch);
+            // return ;
         }
 
         // Save transaction
