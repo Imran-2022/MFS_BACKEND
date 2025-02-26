@@ -8,15 +8,19 @@ const authorize = async function (req, res, next) {
     token = token.split(" ")[1]?.trim();
     if (!token) return res.status(401).send("Invalid Token");
     // console.log(token);
+
     try {
         const decoded = await jwt.verify(token, process.env.JWT_SECRET_KEY);
+
         // console.log("decoded",decoded);
         if (!decoded) return res.status(400).send('Invalid token');
         req.user = decoded; // Attach user data to request object
+
         next();
+        
     } catch (err) {
         return res.status(400).send("Invalid token");
     }
 };
 
-module.exports = authorize;  // ✅ Correct export
+module.exports = authorize;

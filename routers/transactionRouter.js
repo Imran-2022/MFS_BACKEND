@@ -163,6 +163,7 @@ const allTransaction = async (req, res) => {
 router.route('/')
     .post(authorize,newTransaction)
     .get(allTransaction)
+    
 router.route('/:mobile')
     .get(userTransactions)
 

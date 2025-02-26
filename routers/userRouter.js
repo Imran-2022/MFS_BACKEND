@@ -132,7 +132,7 @@ const updateUser = async (req, res) => {
         return res.status(200).json({ message: "Agent updated successfully", user });
 
     } catch (error) {
-        console.error("Error updating agent:", error);
+        // console.error("Error updating agent:", error);
         return res.status(500).json({ error: "Something went wrong" });
     }
 };
@@ -158,7 +158,7 @@ const getUsersBalance = async (req, res) => {
         const userTotalBalance = users.reduce((sum, user) => sum + (Number(user.balance) || 0), 0);
         res.json({ userTotalBalance });
     } catch (error) {
-        console.error("Error fetching user balance:", error);
+        // console.error("Error fetching user balance:", error);
         res.status(500).send("Something went wrong");
     }
 };
@@ -217,7 +217,6 @@ router.route('/agentspending')
 
 router.route('/agentsRescharge')
     .get(authorize,agentsWithReschargeRequest)
-
 
 router.route('/auth')
     .post(authUser)
