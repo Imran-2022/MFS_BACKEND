@@ -52,10 +52,10 @@ const newTransaction = async (req, res) => {
                 else{
                     const admin = await User.findOne({ accountType: "Admin" });
                     admin.balance+=5; //income
-                    await admin.save();
                      // Deduct from sender & add to receiver
                     senderUser.balance -=( amount + 5);
                     receiverUser.balance += amount;
+                    await admin.save();
                 }
                
             }

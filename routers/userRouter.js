@@ -168,10 +168,32 @@ const agentsWithReschargeRequest = async (req, res) => {
         res.status(500).send("Something went wrong");
     }
 };
+const allUsers = async (req, res) => {
+    try {
+        const users = await User.find({ 
+           
+        }).select("-pin");
+        // console.log("Found users:", users); // Debugging line
+        res.send(users);
+    } catch (error) {
+        res.status(500).send("Something went wrong");
+    }
+};
 
+const userCount = async (req, res) => {
+    try {
+        const count = await User.countDocuments();
+        res.status(200).json({ success: true, totalUsers: count });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Something went wrong" });
+    }
+};
+
+router.get('/count', userCount);
 
 router.route('/')
     .post(newUser)
+    .get(allUsers)
 
 router.route('/agentspending')
     .get(agentsWithPending)
