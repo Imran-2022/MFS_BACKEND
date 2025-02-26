@@ -55,6 +55,10 @@ const userSchema = new Schema({
         enum: ["block", "active"],
         default:"active"
     },
+    timestamp: {
+        type: Date,
+        default: Date.now // Auto-sets the transaction time
+    }
 });
 
 

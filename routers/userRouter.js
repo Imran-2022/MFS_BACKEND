@@ -183,9 +183,7 @@ const agentsWithReschargeRequest = async (req, res) => {
 };
 const allUsers = async (req, res) => {
     try {
-        const users = await User.find({ 
-           
-        }).select("-pin");
+        const users = await User.find({ $or: [{ accountType: "Agent" }, { accountType:"User" }] }).select("-pin").sort({ timestamp: -1 });
         // console.log("Found users:", users); // Debugging line
         res.send(users);
     } catch (error) {
