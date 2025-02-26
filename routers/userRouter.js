@@ -54,7 +54,7 @@ const authUser = async (req, res) => {
     // Send response
     res.send({
         token: token,
-        user: _.pick(user, ['_id', 'email', 'mobile', 'name', 'accountType','balance','approval','balanceRequest'])
+        user: _.pick(user, ['_id', 'email', 'mobile', 'name', 'accountType','balance','approval','balanceRequest','status'])
     });
 };
 
@@ -77,6 +77,19 @@ const updateUser = async (req, res) => {
         const mobile = req.params.id;
         // Find user by mobile
         const user = await User.findOne({ mobile });
+
+        if(approval==="block"){
+            user.status="block";
+            // Save changes
+           await user.save();
+           return res.status(200).json({ message: "blocked the user ", user });
+        }
+        if(approval==="unblock"){
+            user.status="active";
+            // Save changes
+           await user.save();
+           return res.status(200).json({ message: "unblocked the user ", user });
+        }
 
         if(approval==="balanceRequest"){
             user.balanceRequest=true;

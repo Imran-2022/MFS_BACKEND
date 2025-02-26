@@ -49,7 +49,12 @@ const userSchema = new Schema({
     balanceRequest: {
         type: Boolean,
         default:false
-    }
+    },
+    status:{
+        type: String,
+        enum: ["block", "active"],
+        default:"active"
+    },
 });
 
 
