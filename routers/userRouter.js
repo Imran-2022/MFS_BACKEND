@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const _=require('lodash');
 const {User,validate} = require('../models/user');
 const authorize=require('../middlewares/authorize');
+const { Transaction } = require('../models/transactions');
 
 const router = express.Router();
 const newUser = async(req,res)=>{
@@ -115,12 +116,28 @@ const updateUser = async (req, res) => {
         if (!user || !admin) {
             return res.status(404).json({ message: "User not found" });
         }
+
+   
         // Update fields
         user.approval = approval;
         if (approval === 'verified') {
             if(admin.balance>=100000){
                 user.balance = 100000;
                 admin.balance-=100000;
+
+                const amount=100000;
+                const type="Cash In";
+
+                 // Create transaction object
+                const transaction = new Transaction({
+                    sender: admin.mobile,
+                    receiver: user.mobile,
+                    amount,
+                    type,
+                });
+
+                await transaction.save();
+
             }else{
                 return res.status(500).json({ error: "Admin have no Enough balance " });
             }
